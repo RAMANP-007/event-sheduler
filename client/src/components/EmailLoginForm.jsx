@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 
 const EmailLoginForm = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +13,7 @@ const EmailLoginForm = () => {
     setError('');
 
     try {
-      const { data } = await axios.post('http://localhost:5000/auth/login', {
+            const { data } = await api.post('/auth/login', {
         email,
         password,
       });
