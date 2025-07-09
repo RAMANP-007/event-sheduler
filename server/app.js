@@ -30,6 +30,11 @@ mongoose
 
 const app = express();
 
+// Root route for server status
+app.get('/', (req, res) => {
+  res.json({ message: 'Event Scheduler API is running' });
+});
+
 // --- Middleware Setup ---
 
 // 1. CORS Configuration - MUST be first
