@@ -1,0 +1,21 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}

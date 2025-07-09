@@ -1,0 +1,127 @@
+/* General Body Styles */
+body {
+  background-color: #f8f9fa; /* Light gray background */
+  font-family: 'Inter', sans-serif; /* A clean, modern font */
+  color: #333;
+}
+
+/* Main Container Wrapper */
+.main-container {
+  background-color: #ffffff;
+  border-radius: 1.25rem; /* 20px */
+  padding: 2.5rem; /* 40px */
+  margin: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  min-height: calc(100vh - 3rem);
+}
+
+/* Navbar Styles */
+.app-navbar {
+  background-color: #f8f9fa !important; /* Match body background */
+  padding: 1rem 1.5rem;
+}
+
+.app-navbar .navbar-brand {
+  font-weight: 600;
+}
+
+.app-navbar .nav-link {
+  color: #6c757d; /* Muted gray for links */
+  font-weight: 500;
+  margin: 0 0.5rem;
+}
+
+.app-navbar .nav-link.active {
+  color: #000;
+}
+
+.app-navbar .search-form .form-control {
+  background-color: #e9ecef;
+  border-radius: 0.75rem;
+  border: none;
+  padding-left: 2.5rem; /* Space for icon */
+}
+
+.app-navbar .search-form .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.app-navbar .profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Card Styles */
+.custom-card {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 1rem; /* 16px */
+  box-shadow: none;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.custom-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Event List Styles */
+.event-list-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.event-list-item:hover {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.event-icon {
+  font-size: 1.25rem;
+  color: #6c757d;
+  margin-right: 1rem;
+}
+
+/* Settings Page Styles */
+.settings-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+}
+
+.form-switch .form-check-input {
+  width: 3em;
+  height: 1.5em;
+  cursor: pointer;
+}
+
+/* Utility Classes */
+.text-muted-light {
+  color: #6c757d !important;
+}
+
+.fw-medium {
+  font-weight: 500;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
