@@ -68,17 +68,48 @@ const ADVERSE_WEATHER_KEYWORDS = ['rain', 'thunderstorm', 'snow', 'storm', 'torn
 // @access  Private
 exports.getWeatherAlerts = async (req, res) => {
   try {
-    // Get all upcoming events for the logged-in user
-    const upcomingEvents = await Event.find({ user: req.user.id, start: { $gte: new Date() } });
+    const upcomingEvents = await Event.find({ 
+      user: req.user.id, 
+      start: { $gte: new Date() }
+    }).populate('location');
 
-    // Filter events that have adverse weather conditions
-    const eventsWithAlerts = upcomingEvents.filter(event =>
-      event.weather && ADVERSE_WEATHER_KEYWORDS.some(keyword => event.weather.toLowerCase().includes(keyword))
-    );
+    if (!upcomingEvents.length) {
+      return res.json([]);
+    }
+
+    const eventsWithAlerts = [];
+
+    for (const event of upcomingEvents) {
+      if (event.location && event.location.lat && event.location.lon) {
+        const options = {
+          method: 'GET',
+          url: 'https://ai-weather-by-meteosource.p.rapidapi.com/find_places',
+          params: {
+            lat: event.location.lat,
+            lon: event.location.lon
+          },
+          headers: {
+            'x-rapidapi-key': process.env.AI_WEATHER_API_KEY,
+            'x-rapidapi-host': process.env.AI_WEATHER_API_HOST,
+          },
+        };
+
+        try {
+          const response = await axios.request(options);
+          // This is a placeholder for actual alert checking logic
+          // based on the response from the weather API
+          if (response.data && response.data.length > 0) { 
+            eventsWithAlerts.push(event);
+          }
+        } catch (apiError) {
+          console.error(`Failed to fetch weather for event ${event._id}:`, apiError.message);
+        }
+      }
+    }
 
     res.json(eventsWithAlerts);
   } catch (error) {
     console.error('Failed to fetch weather alerts:', error);
-    res.status(500).json({ message: 'Failed to fetch weather alerts.' });
+    res.status(500).json({ message: 'Failed to process weather alerts.' });
   }
 };
