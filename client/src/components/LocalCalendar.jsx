@@ -29,7 +29,7 @@ const LocalCalendar = () => {
   const [view, setView] = useState('month');
 
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: import.m.env.VITE_API_BASE_URL,
     headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
   });
 

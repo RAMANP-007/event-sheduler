@@ -57,7 +57,7 @@ const WeatherAlerts = () => {
 
       try {
         // Corrected API endpoint
-        const { data } = await axios.get(`/api/events`, {
+        const { data } = await axios.get(`/api/weather/alerts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

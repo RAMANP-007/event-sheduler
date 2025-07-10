@@ -1,4 +1,5 @@
 const axios = require('axios');
+const Event = require('../models/Event');
 
 // @desc    Get weather for a specific location and date
 // @route   GET /api/weather?lat=37.81021&lon=-122.42282&date=2021-08-24
@@ -57,5 +58,27 @@ exports.getForecast = async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch 5-day forecast:', error.response ? error.response.data : error.message);
     res.status(error.response?.status || 500).json({ message: 'Failed to fetch 5-day forecast data.' });
+  }
+};
+
+const ADVERSE_WEATHER_KEYWORDS = ['rain', 'thunderstorm', 'snow', 'storm', 'tornado', 'hurricane'];
+
+// @desc    Get all upcoming events with adverse weather conditions
+// @route   GET /api/weather/alerts
+// @access  Private
+exports.getWeatherAlerts = async (req, res) => {
+  try {
+    // Get all upcoming events for the logged-in user
+    const upcomingEvents = await Event.find({ user: req.user.id, start: { $gte: new Date() } });
+
+    // Filter events that have adverse weather conditions
+    const eventsWithAlerts = upcomingEvents.filter(event =>
+      event.weather && ADVERSE_WEATHER_KEYWORDS.some(keyword => event.weather.toLowerCase().includes(keyword))
+    );
+
+    res.json(eventsWithAlerts);
+  } catch (error) {
+    console.error('Failed to fetch weather alerts:', error);
+    res.status(500).json({ message: 'Failed to fetch weather alerts.' });
   }
 };
