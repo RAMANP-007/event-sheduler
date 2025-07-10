@@ -67,49 +67,29 @@ const ADVERSE_WEATHER_KEYWORDS = ['rain', 'thunderstorm', 'snow', 'storm', 'torn
 // @route   GET /api/weather/alerts
 // @access  Private
 exports.getWeatherAlerts = async (req, res) => {
+  const { lat, lon } = req.query;
+
+  if (!lat || !lon) {
+    return res.status(400).json({ message: 'Latitude and longitude query parameters are required.' });
+  }
+
+  const options = {
+    method: 'GET',
+    url: 'https://api.openweathermap.org/data/3.0/onecall',
+    params: {
+      lat,
+      lon,
+      exclude: 'current,minutely,hourly,daily',
+      appid: process.env.OPENWEATHERMAP_API_KEY,
+    },
+  };
+
   try {
-    const upcomingEvents = await Event.find({ 
-      user: req.user.id, 
-      start: { $gte: new Date() }
-    }).populate('location');
-
-    if (!upcomingEvents.length) {
-      return res.json([]);
-    }
-
-    const eventsWithAlerts = [];
-
-    for (const event of upcomingEvents) {
-      if (event.location && event.location.lat && event.location.lon) {
-        const options = {
-          method: 'GET',
-          url: 'https://ai-weather-by-meteosource.p.rapidapi.com/find_places',
-          params: {
-            lat: event.location.lat,
-            lon: event.location.lon
-          },
-          headers: {
-            'x-rapidapi-key': process.env.AI_WEATHER_API_KEY,
-            'x-rapidapi-host': process.env.AI_WEATHER_API_HOST,
-          },
-        };
-
-        try {
-          const response = await axios.request(options);
-          // This is a placeholder for actual alert checking logic
-          // based on the response from the weather API
-          if (response.data && response.data.length > 0) { 
-            eventsWithAlerts.push(event);
-          }
-        } catch (apiError) {
-          console.error(`Failed to fetch weather for event ${event._id}:`, apiError.message);
-        }
-      }
-    }
-
-    res.json(eventsWithAlerts);
+    const response = await axios.request(options);
+    // Return the alerts array, or an empty array if it doesn't exist
+    res.json(response.data.alerts || []);
   } catch (error) {
-    console.error('Failed to fetch weather alerts:', error);
-    res.status(500).json({ message: 'Failed to process weather alerts.' });
+    console.error('Failed to fetch weather alerts from OpenWeatherMap:', error.message);
+    res.status(500).json({ message: 'Failed to fetch weather alerts' });
   }
 };

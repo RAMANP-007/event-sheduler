@@ -42,12 +42,12 @@ const itemVariants = {
 };
 
 const WeatherAlerts = () => {
-  const [events, setEvents] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchAlerts = async (lat, lon) => {
       const token = localStorage.getItem('authToken');
       if (!token) {
         setError('You must be logged in to view alerts.');
@@ -56,18 +56,11 @@ const WeatherAlerts = () => {
       }
 
       try {
-        // Corrected API endpoint
         const { data } = await axios.get(`/api/weather/alerts`, {
+          params: { lat, lon },
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        const upcomingEvents = data.filter(event => new Date(event.start) >= new Date());
-
-        const filteredEvents = upcomingEvents.filter(event =>
-          event.weather && ADVERSE_WEATHER_KEYWORDS.some(keyword => event.weather.toLowerCase().includes(keyword))
-        );
-
-        setEvents(filteredEvents);
+        setAlerts(data);
       } catch (err) {
         setError('Failed to fetch weather alerts.');
         console.error(err);
@@ -76,23 +69,22 @@ const WeatherAlerts = () => {
       }
     };
 
-    fetchEvents();
-  }, []);
-
-  const handleDelete = async (eventId) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
-
-    const token = localStorage.getItem('authToken');
-    try {
-      await axios.delete(`/api/events/${eventId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEvents(events.filter(event => event._id !== eventId));
-    } catch (err) {
-      setError('Failed to delete the event.');
-      console.error('Delete error:', err);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchAlerts(latitude, longitude);
+        },
+        (err) => {
+          setError('Geolocation is required to fetch weather alerts. Please enable location services.');
+          setLoading(false);
+        }
+      );
+    } else {
+      setError('Geolocation is not supported by this browser.');
+      setLoading(false);
     }
-  };
+  }, []);
 
   if (loading) return <AnimatedLoader />;
   if (error) return <AnimatedError message={error} />;
@@ -109,31 +101,26 @@ const WeatherAlerts = () => {
         Weather Alerts
       </motion.h2>
       <AnimatePresence>
-        {events.length === 0 ? (
+        {alerts.length === 0 ? (
           <motion.div variants={itemVariants}>
-            <AnimatedError message="No upcoming events with adverse weather conditions found." />
+            <AnimatedError message="No weather alerts for your current location." />
           </motion.div>
         ) : (
-          events.map((event) => (
+          alerts.map((alert, index) => (
             <motion.div 
-              key={event._id} 
+              key={index} 
               className="card-futuristic mb-3 p-4"
               variants={itemVariants}
               exit={{ opacity: 0, x: -50 }}
             >
-              <div className="d-flex justify-content-between align-items-start">
-                <div>
-                  <h5 className="fw-semibold">{event.title}</h5>
-                  <p className="text-muted mb-2">
-                    {format(new Date(event.start), 'PPP')} - {event.city}
-                  </p>
-                  <p className="mb-0">
-                    <strong className="text-danger">Alert:</strong> The forecast predicts {event.weather}.
-                  </p>
-                </div>
-                <button className="btn-futuristic-danger" onClick={() => handleDelete(event._id)}>
-                  <i className="bi bi-trash"></i>
-                </button>
+              <div>
+                <h5 className="fw-semibold text-danger">{alert.event}</h5>
+                <p className="text-muted mb-2">
+                  From: {format(new Date(alert.start * 1000), 'PPP p')} <br/>
+                  To: {format(new Date(alert.end * 1000), 'PPP p')}
+                </p>
+                <p className="mb-0">{alert.description}</p>
+                <p className="text-muted mt-2">Source: {alert.sender_name}</p>
               </div>
             </motion.div>
           ))
